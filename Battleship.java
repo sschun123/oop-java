@@ -1,5 +1,6 @@
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.text.*;
 
 public class Battleship {
     static final protected char EMPTY = '-';
@@ -30,68 +31,96 @@ public class Battleship {
     };
 
     public static void main(String[] args) {
-        System.out.println("Welcome to Battleship!");
-        Scanner input = new Scanner(System.in);
+        // System.out.println("Welcome to Battleship!");
+        // Scanner input = new Scanner(System.in);
 
-        Battleship.initGame(input);
-        Battleship.playGame("1", Battleship.playerOneBoard, Battleship.playerTwoBoard, input);
+        // Battleship.initGame(input);
+        // Battleship.playGame(Battleship.playerOneBoard, Battleship.playerTwoBoard, input);
+        int test = 100;
+        test++;
+        System.out.println("jackets".equals("Jackets"));
+        DecimalFormat tForm = new DecimalFormat("##.00");
+System.out.println(tForm.format(12682.1));
     }
 
-    private static void playGame(String player, char[][] boardOne, char[][] boardTwo, Scanner input) {
-        boolean gameover = false;
+    private static void playGame(char[][] boardOne, char[][] boardTwo, Scanner input) {
+        boolean playerOneWin = false;
+        boolean playerTwoWin = false;
 
         do {
-            Battleship.playTurn("1", "2", boardTwo, input);
+            playerOneWin = Battleship.playTurn("1", "2", boardTwo, input);
             Battleship.printBattleShip(boardTwo);
-            int boardTwoHits = Battleship.countHits(boardTwo);
-            if (boardTwoHits == Battleship.MAX_SHIPS) {
-                gameover = true;
+            System.out.println("");
+            if (playerOneWin) {
                 break;
             }
-            Battleship.playTurn("2", "1", boardOne, input);
+            
+            playerTwoWin = Battleship.playTurn("2", "1", boardOne, input);
             Battleship.printBattleShip(boardOne);
-            int boardOneHits = Battleship.countHits(boardOne);
-            if (boardOneHits == Battleship.MAX_SHIPS) {
-                gameover = true;
+            System.out.println("");
+            if (playerTwoWin) {
                 break;
             }
-        } while (!gameover);
+        } while (!(playerOneWin || playerTwoWin));
+
+        String playerName;
+        if (playerOneWin) {
+            playerName = "1";
+        }
+        else {
+            playerName = "2";
+        }
+
+        System.out.printf("PLAYER %s WINS! YOU SUNK ALL OF YOUR OPPONENT'S SHIPS!\n", playerName);
+        System.out.println("");
+        System.out.println("Final boards:");
+        System.out.println("");
+        Battleship.printBattleShip(boardOne);
+        System.out.println("");
+        Battleship.printBattleShip(boardTwo);
     }
 
-    private static void playTurn(String playerName, String oppName, char[][] board, Scanner input) {
+    private static boolean playTurn(String playerName, String oppName, char[][] board, Scanner input) {
         boolean validInput = false;
 
         int x = 0;
         int y = 0;
         do {
-            System.out.printf("Player %s, enter hit row/column:\n", playerName);
-            x = input.nextInt();
-            y = input.nextInt();
-            if (x >= Battleship.BOARD_SIZE) {
+            try {
+                System.out.printf("Player %s, enter hit row/column:\n", playerName);
+                x = input.nextInt();
+                y = input.nextInt();
+                input.nextLine();
+                if (x >= Battleship.BOARD_SIZE) {
+                    System.out.println("Invalid coordinates. Choose different coordinates.");
+                }
+                else if (board[x][y] == Battleship.HIT || board[x][y] == Battleship.MISS) {
+                    System.out.println("You already fired on this spot. Choose diffferent coordinates.");
+                }
+                else {
+                    validInput = true;
+                }
+            } catch (InputMismatchException e) {
+                input.next();
                 System.out.println("Invalid coordinates. Choose different coordinates.");
-            }
-            else if (board[x][y] == Battleship.HIT || board[x][y] == Battleship.MISS) {
-                System.out.println("You already fired on this spot. Choose diffferent coordinates.");
-            }
-            else {
-                validInput = true;
             }
         } while (!validInput);
 
         if (board[x][y] == Battleship.SHIP) {
             board[x][y] = Battleship.HIT;
-            System.out.printf("PLAYER %s HIT PLAYER %s's SHIP!\n", playerName, oppName);
         }
         else if (board[x][y] == Battleship.EMPTY) {
             board[x][y] = Battleship.MISS;
             System.out.printf("PLAYER %s MISSED!\n", playerName);
+            return false;
         }
 
         int hits = Battleship.countHits(board);
         if (hits >= Battleship.MAX_SHIPS) {
-            System.out.printf("PLAYER %s WINS! YOU SUNK ALL OF OUR OPPONENT'S SHIPS!\n", playerName);
-            return;
+            return true;
         }
+        System.out.printf("PLAYER %s HIT PLAYER %s's SHIP!\n", playerName, oppName);
+        return false;
     }
 
     private static int countHits(char[][] board) {
@@ -134,7 +163,7 @@ public class Battleship {
                 try {
                     int row = input.nextInt();
                     int column = input.nextInt();
-
+                    input.nextLine();
                     if (row >= MAX_SHIPS || column >= MAX_SHIPS) {
                         System.out.println("Invalid coordinates. Choose different coordinates.");
                     }
@@ -146,6 +175,7 @@ public class Battleship {
                         board[row][column] = Battleship.SHIP;
                     }
                 } catch (InputMismatchException e) {
+                    input.next();
                     System.out.println("Invalid coordinates. Choose different coordinates.");
                 }
             } while (!validInput);
@@ -170,6 +200,4 @@ public class Battleship {
 			System.out.println("");
 		}
 	}
-
-    public static void addShip() {}
 }
